@@ -1,5 +1,5 @@
 # Fernwärme Heizungsregelung
-Ein Projekt welches die Wärmeentnahme einer Fernwärme-Übergabestation regelt.
+Ein Projekt welches die Wärmeentnahme einer Fernwärme-Übergabestation regelt. Dies betrifft nur den Heizungskreislauf und nicht die Aufbereitung des Brauchwarmwassers.
 
 
 
