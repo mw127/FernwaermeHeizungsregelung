@@ -15,14 +15,16 @@ import paho.mqtt.client as mqtt
 
 ########logging##########
 logger=logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 filehandler=handlers.RotatingFileHandler(
-    "/home/mw/Pyton/HZlogs.txt", maxBytes=20000, backupCount=3)
-filehandler.setLevel(logging.INFO)
+    "HZlogs.txt", maxBytes=20000, backupCount=3)
+logger.addHandler(filehandler)
+filehandler.setLevel(logging.DEBUG)
 
 streamhandler=logging.StreamHandler()
-streamhandler.setLevel(logging.INFO)
+logger.addHandler(streamhandler)
+streamhandler.setLevel(logging.DEBUG)
 
 formater = logging.Formatter("%(asctime)s, %(levelname)s, %(message)s")
 filehandler.setFormatter(formater)
@@ -38,9 +40,10 @@ mqtt_topic_status = "Smarthome/HWR1/Heizung/Status"
 mqtt_ltw = "und wech"
 
 GPIO.setmode(GPIO.BCM)
-
+GPIO.setwarnings(False)
 BEREICH = 196000
 intStellung = 0
+sollstatus=""
 
 # GPIO17 Endschalter
 pin_endschalter = 17
@@ -95,15 +98,20 @@ def on_connect(client, userdata, flags, rc):
         #und dann?
 
 def on_message(client, userdata, msg):
+    global sollstatus
     strmsg = str(msg.payload.decode("utf-8"))
-    if msg.topic == "":
+    logger.debug("Nachricht: " + strmsg)
+    logger.debug("Topic: " + msg.topic)
+    if msg.topic == "Smarthome/HWR1/Heizung/Heizstatus":
         if strmsg== "on":
+            sollstatus="on"
             betrieb()
         elif strmsg == "off":
+            sollstatus="off"
             schliessen()
         else:
             logger.error("unknow keyword: " + strmsg)
-    elif msg.topic == "Smarthome/HWR1/Heizung/SMStellung":
+    elif msg.topic == "Smarthome/HWR1/Heizung/SMStellung" and sollstatus == "on":
         logger.info("Schrittmotor auf Position " + strmsg + " stellen")
         zustellen(int(strmsg))
 
@@ -134,6 +142,7 @@ def Reffahrt():
         stepps("open",1)
     #Endschalter erreicht
     #Ventil zufahren
+    time.sleep(0.5)
     stepps("close",BEREICH)
     #Schrittmotortreiber schlafen legen
     GPIO.output(pin_sleep, False)
@@ -141,20 +150,21 @@ def Reffahrt():
 
 def betrieb():
     GPIO.output(pin_sleep, True)
-    zustellen(7000) #Auf Position 7000 fahren
+    zustellen(8000) #Auf Position 8000 fahren
     #Pumpe anschalten
     GPIO.output(pin_pump, True)
     logger.info("Anlage im Betrieb")    
 
 def zustellen(pos):
     global intStellung
+    logger.debug("aktuelle Wert in Stellung: " + str(intStellung))
     if pos > intStellung:
         stepps("open",pos-intStellung)
         intStellung=pos
     elif pos < intStellung:
         stepps("close",intStellung-pos)
         intStellung=pos
-    logger.info("Position " + intStellung + " erreicht")
+    logger.info("Position " + str(intStellung) + " erreicht")
     client.publish("Smarthome/HWR1/Heizung/istPosition", intStellung)
 
 def schliessen():
@@ -183,9 +193,9 @@ try:
         for sensor in sensors: #Sensorwerte übertragen 
             global device_file
             device_file = base_dir + str(sensor) + '/w1_slave'
-            logger.info(sensors[sensor])#Sensorname
+            #logger.info(sensors[sensor])#Sensorname
             temp = read_temp()
-            logger.info(temp)  #Sensorwert
+            #logger.info(temp)  #Sensorwert
             client.publish("Smarthome/HWR1/Heizung/Temp/" + sensors[sensor], str(temp))
 
         time.sleep(10)
