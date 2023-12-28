@@ -109,8 +109,8 @@ def on_message(client, userdata, msg):
 
 def on_disconnect(client, userdata, rc):
     logger.error("disconnectiong reason " + str(rc))
-    client.connected_flag = False
-
+    #und nun?
+    schliessen()
 
 def onestep():
     GPIO.output(pin_step, True)
@@ -147,7 +147,7 @@ def betrieb():
     logger.info("Anlage im Betrieb")    
 
 def zustellen(pos):
-    #
+    global intStellung
     if pos > intStellung:
         stepps("open",pos-intStellung)
         intStellung=pos
@@ -160,11 +160,11 @@ def zustellen(pos):
 def schliessen():
     #Ventil auf 0 fahren
     zustellen(0)
-    #Pumpe abschalten
-    #Motortreiber abschalten
+    #Pumpe abschalten    
     GPIO.output(pin_pump, False)
+    #Motortreiber abschalten
     GPIO.output(pin_sleep,False)
-    logger.info("Anlage abgeschaltet")
+    logger.info("Anlage abgeschaltet/Standby")
 
 client = mqtt.Client()
 client.on_connect = on_connect
@@ -192,7 +192,9 @@ try:
 
 except KeyboardInterrupt:
     logger.info("Programm abgebrochen")
-    
+
+#wenn Abbruch    
 schliessen()
+client.publish("Smarthome/HWR1/Heizung/SMStellung",0) #Sollpostion auf 0 stellen
 GPIO.cleanup()
 logger.info("Programm beendet, System heruntergefahren")
