@@ -92,6 +92,7 @@ def on_connect(client, userdata, flags, rc):
         logger.info("connected with mqtt-broker")
     else:
         logger.error("Bad connection Returned code=" + str(rc))
+        #und dann?
 
 def on_message(client, userdata, msg):
     strmsg = str(msg.payload.decode("utf-8"))
@@ -134,24 +135,27 @@ def Reffahrt():
     #Endschalter erreicht
     #Ventil zufahren
     stepps("close",BEREICH)
+    #Schrittmotortreiber schlafen legen
     GPIO.output(pin_sleep, False)
+    time.sleep(0.2) #kurz mal warten
 
 def betrieb():
     GPIO.output(pin_sleep, True)
-    zustellen(7000)
-    #Auf Position 7000 fahren
+    zustellen(7000) #Auf Position 7000 fahren
     #Pumpe anschalten
-    GPIO.output(pin_pump, True)    
+    GPIO.output(pin_pump, True)
+    logger.info("Anlage im Betrieb")    
 
 def zustellen(pos):
-    #auf Position 5000 fahren
+    #
     if pos > intStellung:
         stepps("open",pos-intStellung)
         intStellung=pos
     elif pos < intStellung:
         stepps("close",intStellung-pos)
         intStellung=pos
-    print("dummy")
+    logger.info("Position " + intStellung + " erreicht")
+    client.publish("Smarthome/HWR1/Heizung/istPosition", intStellung)
 
 def schliessen():
     #Ventil auf 0 fahren
@@ -160,6 +164,7 @@ def schliessen():
     #Motortreiber abschalten
     GPIO.output(pin_pump, False)
     GPIO.output(pin_sleep,False)
+    logger.info("Anlage abgeschaltet")
 
 client = mqtt.Client()
 client.on_connect = on_connect
@@ -190,4 +195,4 @@ except KeyboardInterrupt:
     
 schliessen()
 GPIO.cleanup()
-logger.info("Programm beendet")
+logger.info("Programm beendet, System heruntergefahren")
