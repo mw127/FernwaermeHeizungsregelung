@@ -38,7 +38,7 @@ streamhandler.setFormatter(formater)
 MQTT_USERNAME = config['MqttSettings']['mqtt_username']
 MQTT_PASSWORT = config['MqttSettings']['mqtt_passwort']
 MQTT_HOST = config['MqttSettings']['mqtt_host']
-MQTT_PORT = config['MqttSettings']['mqtt_port']
+MQTT_PORT = int(config['MqttSettings']['mqtt_port'])
 mqtt_topic_status = "Smarthome/HWR1/Heizung/Status"
 mqtt_ltw = "und wech"
 
