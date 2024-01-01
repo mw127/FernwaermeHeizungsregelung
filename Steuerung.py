@@ -12,6 +12,9 @@ from decimal import Decimal, ROUND_HALF_UP
 import RPi.GPIO as GPIO
 import time
 import paho.mqtt.client as mqtt
+import helper
+
+config = helper.read_config()
 
 ########logging##########
 logger=logging.getLogger()
@@ -32,10 +35,10 @@ streamhandler.setFormatter(formater)
 
 ##########ende Logging##############
 
-MQTT_USERNAME = "UserHz"
-MQTT_PASSWORT = "YjByTM"
-MQTT_HOST = "192.168.178.38"
-MQTT_PORT = 1883
+MQTT_USERNAME = config['MqttSettings']['mqtt_username']
+MQTT_PASSWORT = config['MqttSettings']['mqtt_passwort']
+MQTT_HOST = config['MqttSettings']['mqtt_host']
+MQTT_PORT = config['MqttSettings']['mqtt_port']
 mqtt_topic_status = "Smarthome/HWR1/Heizung/Status"
 mqtt_ltw = "und wech"
 
