@@ -120,7 +120,7 @@ def on_message(client, userdata, msg):
 
 def on_disconnect(client, userdata, rc):
     logger.error("disconnectiong reason " + str(rc))
-    #und nun?
+    #und nun? Verbindung zum mqtt-broker verloren?
     schliessen()
 
 def onestep():
@@ -168,7 +168,7 @@ def zustellen(pos):
         stepps("close",intStellung-pos)
         intStellung=pos
     logger.info("Position " + str(intStellung) + " erreicht")
-    client.publish("Smarthome/HWR1/Heizung/istPosition", intStellung)
+    client.publish("Smarthome/HWR1/Heizung/istPosition", str(intStellung), retain= True)
 
 def schliessen():
     #Ventil auf 0 fahren
@@ -183,14 +183,14 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORT)
-client.will_set(mqtt_topic_status, "und wech", 0, False)
+client.will_set(mqtt_topic_status, payload="und wech", qos=0, retain=True)
 client.connect(MQTT_HOST, MQTT_PORT, 60)
 
 logger.info("Referenz-Fahrt starten")
 Reffahrt()
 logger.info("mqtt starten")
 client.loop_start()
-
+client.publish("Smarthome/HWR1/Heizung/Status", "online", retain= True)
 try:
     while True:
         for sensor in sensors: #Sensorwerte übertragen 
@@ -208,6 +208,9 @@ except KeyboardInterrupt:
 
 #wenn Abbruch    
 schliessen()
-client.publish("Smarthome/HWR1/Heizung/SMStellung",0) #Sollpostion auf 0 stellen
+client.publish("Smarthome/HWR1/Heizung/SMStellung", "0", retain = True) #Sollpostion auf 0 stellen
+client.publish("Smarthome/HWR1/Heizung/Status", "offline", retain =True)
+client.disconnect()
+client.loop_stop()
 GPIO.cleanup()
 logger.info("Programm beendet, System heruntergefahren")
