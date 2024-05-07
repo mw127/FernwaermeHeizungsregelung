@@ -5,6 +5,8 @@
 # 10-000802395a3e innen
 # 10-000802394c3f Nachlauf
 # 28-00000a47b3db Vorlauf
+# neuer Sensor für Vorlauf
+# 28-00000c34e7e1 Vorlauf
 import logging
 import logging.handlers as handlers
 from pathlib import Path
@@ -63,7 +65,7 @@ GPIO.setup(pin_pump, GPIO.OUT)
 base_dir = '/sys/bus/w1/devices/'
 sensors={'10-000802395a3e':"Innen",
        '10-000802394c3f':'Nachlauf',
-       '28-00000a47b3db':'Vorlauf'}
+       '28-00000c34e7e1':'Vorlauf'}
 
 # DIRECTION_PIN = 20
 # STEP_PIN = 21
