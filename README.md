@@ -19,5 +19,6 @@ Sensorwerte, Schrittmotorstellung, Systemzustand werden per mqtt mitgeteilt.
 Verbaute Hardware:
 - Raspberry Pi 3b
 - [Pololu DRV8825 Stepper Motor Driver](https://www.pololu.com/product/2133)
-- Schrittmotor NEMA 
+- Schrittmotor NEMA
+- Temperatur-Sensoren Dallas/Maxim DS 18B20
 - Verbindungs Aufnahme für Schrittmotor und Getrieb
